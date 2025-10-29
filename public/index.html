@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🟢 Envío por WhatsApp</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    /* --- (Tu CSS de diseño bonito va aquí - sin cambios) --- */
+    :root {
+      --color-primary: #075E54;  /* Verde oscuro WA */
+      --color-secondary: #128C7E; /* Verde medio WA */
+      --color-accent: #25D366;   /* Verde brillante WA */
+      --color-bg: #f0f2f5;       /* Fondo de app WA */
+      --color-bg-chat: #E5DDD5;   /* Fondo de chat WA */
+      --color-bg-light: #FFFFFF;
+      --color-text-dark: #333;
+      --color-text-light: #f1f1f1;
+      --color-text-muted: #667781;
+      --color-border: #e0e0e0;
+      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --border-radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background-color: var(--color-bg); color: var(--color-text-dark); line-height: 1.6; }
+    .header { background-color: var(--color-primary); color: var(--color-bg-light); padding: 20px 40px; text-align: center; box-shadow: var(--shadow-md); }
+    .header h1 { font-size: 28px; font-weight: 700; }
+    .main-container { max-width: 1200px; margin: 30px auto; padding: 0 30px; display: flex; flex-direction: column; gap: 30px; }
+    .card { background-color: var(--color-bg-light); border-radius: var(--border-radius); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); overflow: hidden; }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--color-border); }
+    .card-header h2, .card-header h3 { color: var(--color-primary); font-weight: 700; font-size: 20px; margin: 0; }
+    .card-body { padding: 24px; }
+    .status-box { text-align: center; }
+    .status-box img { width: 280px; height: 280px; border-radius: var(--border-radius); box-shadow: var(--shadow-md); margin-top: 10px; }
+    .status-box .status-message { font-size: 20px; font-weight: 500; padding: 20px; }
+    .status-box .error { color: #D32F2F; }
+    .status-box .success { color: var(--color-secondary); }
+    .content-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+    .form-container label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--color-text-muted); }
+    .form-container textarea, .form-container input[type="file"] { width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; font-size: 15px; font-family: inherit; margin-bottom: 20px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .form-container textarea:focus, .form-container input:focus { outline: none; border-color: var(--color-secondary); box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.2); }
+    .btn-submit { width: 100%; padding: 14px; background-color: var(--color-accent); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
+    .btn-submit:hover { background-color: #20b058; }
+    
+    /* NUEVO: Estilo para el botón desactivado */
+    .btn-submit:disabled {
+      background-color: #9eada4;
+      cursor: not-allowed;
+    }
+
+    #resultado { margin-top: 20px; text-align: center; font-weight: 500; font-size: 16px; }
+    .preview-box { background-color: var(--color-bg-chat); background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgHcW4AAAAOklEQVQIW2NkYGBoAOD/A/IMRkZGWIny/PnzZ2f48+fPZ2D4/v27AxYg/P/3799/0nBv3rYBvAwAHA4i4r/A1pkAAAAASUVORK5CYII="); border-radius: var(--border-radius); padding: 15px; min-height: 200px; }
+    #previewMensaje { background: #DCF8C6; padding: 10px 14px; border-radius: 12px 12px 12px 0; line-height: 1.5; color: var(--color-text-dark); box-shadow: var(--shadow-sm); word-wrap: break-word; white-space: pre-wrap; }
+    #previewImagen img { width: 100%; border-radius: 10px; box-shadow: var(--shadow-sm); margin-bottom: 10px; }
+    #logs { background: #2d3748; color: #f7fafc; max-height: 400px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; border-radius: 0 0 8px 8px; padding: 20px; margin: -24px; margin-top: 0; }
+    @media (max-width: 900px) { .content-wrapper { grid-template-columns: 1fr; } .main-container { padding: 0 20px; margin: 20px auto; } .header { padding: 20px; } }
+    @media (max-width: 600px) { .main-container { padding: 0 15px; margin: 15px auto; } }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1>🟢 Envío Masivo por WhatsApp</h1>
+  </header>
+
+  <main class="main-container">
+
+    <div class="card status-box" id="statusContainer">
+      <div class="card-body">
+         <h3 class="status-message">Conectando al servidor...</h3>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      
+      <div class="card form-container">
+        <div class="card-header">
+          <h2>1. Prepara tu envío</h2>
+        </div>
+        <div class="card-body">
+          <form id="formulario" action="/enviar" method="post" enctype="multipart/form-data">
+            <label for="numeros">📞 Números (uno por línea)</label>
+            <textarea id="numeros" name="numeros" rows="6" placeholder="51912345678&#10;51987654321&#10;..." required></textarea>
+            <label for="mensaje">💬 Mensaje</label>
+            <textarea id="mensaje" name="mensaje" rows="5" placeholder="Escribe el mensaje..." required></textarea>
+            <label for="imagen">🖼 Imagen (opcional)</label>
+            <input type="file" name="imagen" accept="image/*" />
+
+            <button type="submit" class="btn-submit" id="submit-button">Enviar Mensajes</button>
+          </form>
+          <div id="resultado"></div>
+        </div>
+      </div>
+      
+      <div class="card preview-container">
+         <div class="card-header">
+           <h3>Vista Previa</h3>
+         </div>
+         <div class="card-body">
+           <div class="preview-box">
+             <div id="previewImagen"></div>
+             <div id="previewMensaje"></div>
+           </div>
+         </div>
+      </div>
+    </div> 
+
+    <div class="card logs-container">
+       <div class="card-header">
+          <h2>2. Sigue el Progreso (Logs en vivo)</h2>
+       </div>
+       <div class="card-body">
+          <pre id="logs"></pre>
+       </div>
+    </div>
+  
+  </main>
+
+
+  <script>
+    const form = document.getElementById('formulario');
+    const resultado = document.getElementById('resultado');
+    const mensajeInput = document.getElementById('mensaje');
+    const imagenInput = document.querySelector('input[name="imagen"]');
+    const previewMensaje = document.getElementById('previewMensaje');
+    const previewImagen = document.getElementById('previewImagen');
+    const logsPre = document.getElementById('logs');
+    
+    // MODIFICADO: Referencia al botón
+    const submitButton = document.getElementById('submit-button');
+
+    function actualizarPreview() {
+      // ... (sin cambios)
+      const mensaje = mensajeInput.value.trim();
+      previewMensaje.innerHTML = mensaje ? mensaje.replace(/\n/g, '<br>') : '...';
+      if (imagenInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImagen.innerHTML = `<img src="${e.target.result}" />`;
+        };
+        reader.readAsDataURL(imagenInput.files[0]);
+      } else {
+        previewImagen.innerHTML = '';
+      }
+    }
+
+    mensajeInput.addEventListener('input', actualizarPreview);
+    imagenInput.addEventListener('change', actualizarPreview);
+
+    // MODIFICADO: Evento submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // --- 1. Desactivar botón ---
+      submitButton.disabled = true;
+      submitButton.innerText = '⏳ Procesando...';
+      
+      resultado.innerText = '⏳ Iniciando proceso...';
+      logsPre.innerText = ''; // Limpiamos logs anteriores
+      
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('/enviar', {
+          method: 'POST',
+          body: formData
+        });
+        const text = await res.text();
+        resultado.innerText = text;
+        // ¡Ya NO reactivamos el botón aquí!
+      } catch (err) {
+        resultado.innerText = '❌ Error al iniciar el proceso.';
+        // Reactivamos SOLO si el 'fetch' inicial falla
+        submitButton.disabled = false;
+        submitButton.innerText = 'Enviar Mensajes';
+      }
+    });
+    
+    actualizarPreview();
+  </script>
+
+  <script>
+    const socket = io();
+    const statusContainer = document.getElementById('statusContainer');
+
+    // 1. Escuchar por el estado (sin cambios)
+    socket.on('status', (status) => {
+      console.log('Nuevo estado:', status);
+      if (status === 'CONNECTED') {
+        statusContainer.innerHTML = '<div class="card-body"><h3 class="status-message success">✅ WhatsApp Conectado</h3></div>';
+      } else if (status === 'WAITING_FOR_QR') {
+        statusContainer.innerHTML = '<div class="card-body"><h3 class="status-message">📲 Escanea el QR para vincular</h3><div id="qrcode-img">Cargando QR...</div></div>';
+      } else {
+        statusContainer.innerHTML = '<div class="card-body"><h3 class="status-message error">❌ WhatsApp Desconectado</h3><p>Reinicia el servidor si es necesario.</p></div>';
+      }
+    });
+
+    // 2. Escuchar por el QR (sin cambios)
+    socket.on('qr', (url) => {
+      const qrDiv = document.getElementById('qrcode-img');
+      if (qrDiv) {
+        qrDiv.innerHTML = `<img src="${url}" alt="Escanea este código QR">`;
+      }
+    });
+    
+    // 3. Escuchar por logs en vivo (sin cambios)
+    socket.on('log', (mensaje) => {
+      logsPre.innerText += mensaje + '\n';
+      logsPre.scrollTop = logsPre.scrollHeight;
+    });
+
+    // ----------------------------------
+    // NUEVO: Escuchar por el fin del proceso
+    // ----------------------------------
+    socket.on('process_finished', () => {
+      console.log('Proceso completado. Reactivando botón.');
+      
+      // Reactivamos el botón
+      const btn = document.getElementById('submit-button');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Enviar Mensajes';
+      }
+      
+      // Actualizamos el resultado
+      const resDiv = document.getElementById('resultado');
+      if (resDiv) {
+        resDiv.innerText = '✅ Proceso finalizado.';
+      }
+    });
+
+  </script>
+
+</body>
+</html>

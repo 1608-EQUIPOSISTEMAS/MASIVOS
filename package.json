@@ -1,0 +1,24 @@
+{
+  "name": "envios-masivos",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1",
+    "multer": "^2.0.2",
+    "puppeteer": "^24.14.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.8.1",
+    "whatsapp-web.js": "^1.34.1"
+  },
+  "description": ""
+}

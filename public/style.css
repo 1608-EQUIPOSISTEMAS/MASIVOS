@@ -1,0 +1,211 @@
+/* --- Reseteo Básico y Globales --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f9f6ff; 
+    color: #333;
+    line-height: 1.6;
+}
+
+/* --- Contenedor Principal (Más ancho) --- */
+.container {
+    max-width: 1200px; /* Aumentamos el ancho para las 2 columnas */
+    margin: 30px auto; 
+    padding: 20px;
+}
+
+/* --- Títulos --- */
+h2 {
+    text-align: center;
+    color: #4a148c;
+    margin-bottom: 25px;
+    font-size: 2rem;
+}
+
+/*
+==================================================
+ ESTILO DEL FORMULARIO (GRID)
+==================================================
+*/
+form#registroForm {
+    display: grid;
+    /* Móvil primero: 1 columna por defecto */
+    grid-template-columns: 1fr;
+    /* El espacio entre las tarjetas ahora lo controla el grid */
+    gap: 25px;
+}
+
+/* --- Estilo de las Tarjetas (Secciones) --- */
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 25px 30px;
+    /* Quitamos el margen, el 'gap' del grid se encarga */
+    margin-bottom: 0; 
+}
+
+.card h3 {
+    color: #6a1b9a;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* --- Grupos de Formulario (Label + Input) --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.card .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* --- Estilo de Inputs y Selects --- */
+input[type="text"],
+input[type="url"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* --- Efecto al hacer clic (focus) --- */
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #7b1fa2;
+    box-shadow: 0 0 0 3px rgba(123, 31, 162, 0.1);
+}
+
+/* --- Texto de Instrucciones --- */
+.instructions {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 10px;
+}
+
+.instructions a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.instructions a:hover {
+    text-decoration: underline;
+}
+
+/* --- Estilo Tarjeta Verde (Seguimiento) --- */
+.card--success {
+    background-color: #f6fffb;
+}
+
+.card--success h3 {
+    color: #00695c;
+}
+
+/* --- Estilo Tarjeta Beige (Marketing) --- */
+.card--warning {
+    background-color: #fffaf2;
+}
+
+.card--warning h3 {
+    color: #a1887f;
+}
+
+/* --- Cuadrícula de 2 Columnas (Interna de Marketing) --- */
+/* Esta cuadrícula sí se aplica siempre, incluso en móvil */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 0px 25px; 
+}
+
+/* --- Estilo para Textarea --- */
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* --- Contenedor del Botón de Envío --- */
+.submit-container {
+    text-align: center;
+    /* Quitamos el margen, el 'gap' del grid se encarga */
+    margin: 0; 
+}
+
+/* --- Botón de Envío --- */
+.submit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(90deg, #b721ff 0%, #e02375 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(224, 35, 117, 0.2);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 35, 117, 0.3);
+}
+
+.submit-btn svg {
+    margin-bottom: -2px; 
+}
+
+/*
+==================================================
+ MEDIA QUERY PARA PANTALLAS GRANDES (2 COLUMNAS)
+==================================================
+*/
+@media (min-width: 900px) {
+    
+    /* 1. Activa las 2 columnas en el formulario */
+    form#registroForm {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* 2. Clase para que una tarjeta ocupe ambas columnas */
+    .card--span-2 {
+        grid-column: span 2;
+    }
+}

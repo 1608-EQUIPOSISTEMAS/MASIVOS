@@ -1,0 +1,7 @@
+# Ignorar dependencias instaladas
+node_modules/
+# Ignorar carpetas de autenticación y caché de whatsapp-web.js
+.wwebjs_auth/
+.wwebjs_cache/
+# Ignorar carpeta de datos de sesión
+session/
