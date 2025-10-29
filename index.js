@@ -286,6 +286,7 @@ async function procesarEnviosPorLotes(numerosRaw, mensaje, imagenPath) {
 
 
 // MODIFICADO: Usamos server.listen en lugar de app.listen
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Interfaz activa en: http://localhost:${port}`);
+  console.log(`🚀 Accesible públicamente en: http://34.42.193.17:${port}`);
 });
